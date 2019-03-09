@@ -13,7 +13,9 @@ class _GameViewState extends State<GameView> {
   List<List<String>> gridData = genBoard(6, 4, 6);
 
   void handlePress(){
+    print("called");
     setState((){
+      print("Going to generate board");
       gridData =genBoard(6, 4, 6);
     });
   }

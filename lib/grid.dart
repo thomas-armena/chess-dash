@@ -33,7 +33,7 @@ class Grid extends StatelessWidget {
 
   Widget square(String name){
     Widget piece;
-    if (name == ""){
+    if (name == "" || name == "x"){
       piece = null;
     } else {
       piece = Image.asset('assets/png/'+name+'.png');
