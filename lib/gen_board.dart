@@ -1,178 +1,174 @@
 import 'dart:math';
+import 'package:chess_dash/coordinate.dart';
+import 'package:chess_dash/board.dart';
 
-List<List<String>> genBoard(int numberOfPieces, int xSize, int ySize) {
-  print("Generated a new board.");
-  var grid = List<List<String>>.generate(
-    ySize, 
-    (i) => List<String>.generate(
-      xSize,
-      (j) => "",
-    )
-  );
+Random random = new Random();
 
-  Random random = new Random();
-  String piece;
+Board genBoard(int numberOfPieces, int xSize, int ySize) {
+  Board board = Board(xSize, ySize);
 
-  //Start at a random spot
-  int yPos = random.nextInt(ySize);
-  int xPos = random.nextInt(xSize);
-  int yPosPrev;
-  int xPosPrev;
-  if (yPos == 0){
-    piece = _chooseRandomPiece(true);
-  } else {
-    piece =_chooseRandomPiece(false);
-  }
-  grid[yPos][xPos] = piece;
-  print(xPos.toString() + " " + yPos.toString() + " " + piece); 
+  Coordinate previousPosition;
+  Coordinate currentPosition = getRandomCoordinate(xSize, ySize);
+  String currentPiece = getRandomPiece(currentPosition);
+  board.set(currentPosition.x, currentPosition.y, currentPiece);
+
+  print(currentPosition.x.toString() + " " + currentPosition.y.toString() + " " + currentPiece); 
 
   for(int i = 1; i < numberOfPieces; i++){
-
-    //Move to random available spot
-    var availablePositions = getAvaliablePositions(xPos, yPos, grid, piece);
-    int randomIndex = random.nextInt(availablePositions.length);
-    yPosPrev = yPos;
-    xPosPrev = xPos;
-    yPos = availablePositions[randomIndex][1];
-    xPos = availablePositions[randomIndex][0];
-
-    //choose a random piece
-    if (yPos == 0){
-      piece = _chooseRandomPiece(true);
-    } else {
-      piece =_chooseRandomPiece(false);
-    }
-
-    //Mark new piece in new spot
-    grid[yPos][xPos] = piece;
+    previousPosition = currentPosition;
+    currentPosition = getRandomAvailablePosition(currentPosition, currentPiece, board);
+    currentPiece = getRandomPiece(currentPosition);
+    board.setFromCoordinate(currentPosition, currentPiece);
 
     //Mark the path of the movement
-    var pathPositions = getPathPositions(xPosPrev, yPosPrev, xPos, yPos);
+    var pathPositions = getPathPositions(previousPosition, currentPosition);
     for(int j = 0; j < pathPositions.length; j++){
-      int yPathPos = pathPositions[j][1];
-      int xPathPos = pathPositions[j][0];
-      print('---->'+xPathPos.toString() + ' ' + yPathPos.toString());
-      if(grid[yPathPos][xPathPos] == ""){
-        grid[yPathPos][xPathPos] = 'x';
+      var pathPosition =pathPositions[j];
+      print('---->'+pathPosition.x.toString() + ' ' + pathPosition.y.toString());
+      if(board.getFromCoordinate(pathPosition) == ""){
+        board.setFromCoordinate(pathPosition, 'x');
       }
     }
-    print(xPos.toString() + " " + yPos.toString() + " " + piece); 
-
+    print(currentPosition.x.toString() + " " + currentPosition.y.toString() + " " + currentPiece); 
   }
-  print(grid.toString());
-  return grid;
+
+  return board;
 }
 
-String _chooseRandomPiece(bool excludePawn){
-  Random random = new Random();
-  if(excludePawn){
-    int randomNum = random.nextInt(5);
-    return ["bishop","king","knight","queen","rook"][randomNum];
-  } else {
-    int randomNum = random.nextInt(6);
-    return ["bishop","king","knight","pawn","queen","rook"][randomNum];
-  }
+Coordinate getRandomAvailablePosition(Coordinate currentPosition, String currentPiece, Board board){
+    var availablePositions = getAvailablePositions(currentPosition, currentPiece, board);
+    int randomIndex = random.nextInt(availablePositions.length);
+    return availablePositions[randomIndex];
+
 }
 
-List<List<int>> getAvaliablePositions(int xCurr, int yCurr, List<List<String>> grid, String piece){
-  List<List<int>> availablePositions = [];
-  Function positionChecker;
+String getRandomPiece(Coordinate currentPosition){
+    if (currentPosition.y == 0){ //Don't choose pawn if on first row of the grid
+      return chooseRandomStringFromList(['bishop','king','knight','queen','rook']);
+    } else {
+      return chooseRandomStringFromList(['bishop','king','knight','queen','rook','pawn']);
+    }
+}
+
+String chooseRandomStringFromList(List<String> list){
+  int randomIndex = random.nextInt(list.length);
+  return list[randomIndex];
+}
+
+Coordinate getRandomCoordinate(xSize, ySize){
+  return Coordinate(random.nextInt(xSize), random.nextInt(ySize));
+}
+
+
+List<Coordinate> getAvailablePositions(Coordinate currentPosition, String piece, Board board){
+  List<Coordinate> availablePositions = [];
   switch(piece){
     case "bishop":
-      positionChecker = isDiagonal;
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-1),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,1),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-1),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,1),true, board));
       break;
     case "king":
-      positionChecker = isKing;
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0,-1),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-1),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,0),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,1),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0,1),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,1),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,0),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-1),false, board));
       break;
     case "knight":
-      positionChecker = isL;
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-2,-1),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(2,-1),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(2,1),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-2,-1),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-2),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,2),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-2),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-2),false, board));
       break;
     case "pawn":
-      positionChecker = isPawn;
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-1),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-1),false, board));
       break;
     case "queen":
-      positionChecker = isQueen;
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0,-1),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-1),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,0),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,1),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0,1),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,1),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,0),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-1),true, board));
       break;
     case "rook":
-      positionChecker = isStraight;
-      break;
-  }
-  for(int y = 0; y < grid.length; y++){
-    for(int x = 0; x < grid[0].length; x++){
-      bool inSamePosition = (x == xCurr && y == yCurr);
-      bool unOccupied = grid[y][x] == "";
-      if(positionChecker(xCurr, yCurr, x, y) && !inSamePosition && unOccupied){
-        availablePositions.add([x,y]);
-      }
-    }
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0,-1),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1, 0),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0, 1),true, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,0),true, board));
   }
   return availablePositions;
 }
 
-List<List<int>> getPathPositions(x1, y1, x2, y2){
-  List<List<int>> pathPositions = [];
+List<Coordinate> getPathPositions(Coordinate position1, Coordinate position2){
+  List<Coordinate> pathPositions = [];
   
-  bool isRightwards = x2 > x1;
-  bool isDownwards = y2 > y1;
+  bool isRightwards = position2.x > position1.x;
+  bool isDownwards = position2.y > position1.y;
   int sign; 
 
   if (isRightwards) sign = 1;
   else sign = -1;
   List<int> xPathPositions = [];
-  for(int x = x1; x2 != x; x += sign){
+  for(int x = position1.x; position2.x != x; x += sign){
     xPathPositions.add(x);
   }
 
   if (isDownwards) sign = 1;
   else sign = -1;
   List<int> yPathPositions = [];
-  for(int y = y1; y2 != y; y += sign){
+  for(int y = position1.y; position2.y != y; y += sign){
     yPathPositions.add(y);
   }
-  //print(xPathPositions.toString());
-  //print(yPathPositions.toString());
 
-  if(y2 == y1){
+  if(position1.y == position2.y){
     for(int i = 1; i < xPathPositions.length; i++){
-      pathPositions.add([xPathPositions[i], y1]);
+      pathPositions.add(Coordinate(xPathPositions[i], position1.y));
     }
-  } else if(x2 == x1){
+  } else if(position1.x == position2.x){
     for(int i = 1; i < yPathPositions.length; i++){
-      pathPositions.add([x1, yPathPositions[i]]);
+      pathPositions.add(Coordinate(position1.x, yPathPositions[i]));
     }
-  } else if((x2 - x1).abs() == (y2 - y1).abs()){
+  } else if((position2.x - position1.x).abs() == (position2.y - position1.y).abs()){
 
     for(int i = 1; i < yPathPositions.length; i++){
-      pathPositions.add([xPathPositions[i], yPathPositions[i]]);
+      pathPositions.add(Coordinate(xPathPositions[i], yPathPositions[i]));
     }
   }
   return pathPositions;
 }
 
-bool isDiagonal(int x1, int y1, int x2, int y2) {
-  return (x2 - x1).abs() == (y2 - y1).abs();
+List<Coordinate> getAvailablePositionsFromMove(Coordinate currentPosition, Coordinate offset, bool repeat, Board board){
+  Coordinate newPosition = addCoordinates(currentPosition, offset);
+  String valueOfNewPosition = board.getFromCoordinate(newPosition);
+
+  if(valueOfNewPosition == "" || valueOfNewPosition == "x"){
+    if (!repeat) return [newPosition];
+    var newList =  getAvailablePositionsFromMove(newPosition, offset, repeat, board);
+    if(valueOfNewPosition == ""){
+      newList.add(newPosition);
+    }
+    return newList;
+  } else {
+    return [];
+  }
 }
 
-bool isStraight(int x1, int y1, int x2, int y2) {
-  return (x1 == x2) || (y1 == y2);
+List<Coordinate> addList(List<Coordinate> a, List<Coordinate> b){
+  for(int i = 0; i < b.length; i++){
+    a.add(b[i]);
+  }
+  return a;
 }
-
-bool isL(int x1, int y1, int x2, int y2) {
-  bool isHorizontalL = (x2 - x1).abs() == 2 && (y2 - y1).abs() == 1;
-  bool isVerticalL = (x2 - x1).abs() == 1 && (y2 - y1).abs() == 2;
-  return isHorizontalL || isVerticalL;
-}
-
-bool isKing(int x1, int y1, int x2, int y2) {
-  return (x2 - x1).abs() <= 1 && (y2 - y1).abs() <= 1;
-}
-
-bool isQueen(int x1, int y1, int x2, int y2) {
-  return isDiagonal(x1, y1, x2, y2) || isStraight(x1, y1, x2, y2);
-}
-
-bool isPawn(int x1, int y1, int x2, int y2) {
-  return (y2 - y1) == -1 && (x2 - x1).abs() == 1;
-}
-
-

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chess_dash/grid.dart';
+import 'package:chess_dash/board.dart';
 import 'package:chess_dash/gen_board.dart';
 
 class GameView extends StatefulWidget {
@@ -10,13 +11,13 @@ class GameView extends StatefulWidget {
 
 class _GameViewState extends State<GameView> {
 
-  List<List<String>> gridData = genBoard(6, 4, 6);
+  Board board = genBoard(6, 4, 6);
 
   void handlePress(){
     print("called");
     setState((){
       print("Going to generate board");
-      gridData =genBoard(6, 4, 6);
+      board = genBoard(6, 4, 6);
     });
   }
 
@@ -24,7 +25,7 @@ class _GameViewState extends State<GameView> {
   Widget build(BuildContext context){
     return Scaffold(
       body: Grid(
-        gridData:gridData,
+        gridData:board.grid,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: handlePress,
