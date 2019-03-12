@@ -11,13 +11,13 @@ class GameView extends StatefulWidget {
 
 class _GameViewState extends State<GameView> {
 
-  Board board = genBoard(6, 4, 6);
+  Board board = genBoard(4, 4, 6);
 
   void handlePress(){
     print("called");
     setState((){
       print("Going to generate board");
-      board = genBoard(6, 4, 6);
+      board = genBoard(4, 4, 6);
     });
   }
 

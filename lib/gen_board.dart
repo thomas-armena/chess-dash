@@ -7,21 +7,27 @@ Random random = new Random();
 Board genBoard(int numberOfPieces, int xSize, int ySize) {
   Board board = Board(xSize, ySize);
 
-  Coordinate previousPosition;
-  Coordinate currentPosition = getRandomCoordinate(xSize, ySize);
-  String currentPiece = getRandomPiece(currentPosition);
-  board.set(currentPosition.x, currentPosition.y, currentPiece);
+  String currentPiece;
+  Coordinate currentPosition;
+  Coordinate nextPosition = getRandomCoordinate(xSize, ySize);
 
-  print(currentPosition.x.toString() + " " + currentPosition.y.toString() + " " + currentPiece); 
 
   for(int i = 1; i < numberOfPieces; i++){
-    previousPosition = currentPosition;
-    currentPosition = getRandomAvailablePosition(currentPosition, currentPiece, board);
-    currentPiece = getRandomPiece(currentPosition);
-    board.setFromCoordinate(currentPosition, currentPiece);
+    currentPosition = nextPosition;
+
+    List<String> shuffledPieces = getShuffledPieces();
+    for(int i = 0; i < shuffledPieces.length; i++){
+      currentPiece = shuffledPieces[i];
+      nextPosition = getRandomAvailablePosition(currentPosition, currentPiece, board);
+      if (nextPosition != null){
+        board.setFromCoordinate(currentPosition, currentPiece);
+        break;
+      }
+    }
+    if (nextPosition == null) break;
 
     //Mark the path of the movement
-    var pathPositions = getPathPositions(previousPosition, currentPosition);
+    var pathPositions = getPathPositions(currentPosition, nextPosition);
     for(int j = 0; j < pathPositions.length; j++){
       var pathPosition =pathPositions[j];
       print('---->'+pathPosition.x.toString() + ' ' + pathPosition.y.toString());
@@ -31,15 +37,29 @@ Board genBoard(int numberOfPieces, int xSize, int ySize) {
     }
     print(currentPosition.x.toString() + " " + currentPosition.y.toString() + " " + currentPiece); 
   }
+  currentPiece = getRandomPiece(currentPosition);
+  board.setFromCoordinate(nextPosition, currentPiece);
 
   return board;
 }
 
 Coordinate getRandomAvailablePosition(Coordinate currentPosition, String currentPiece, Board board){
     var availablePositions = getAvailablePositions(currentPosition, currentPiece, board);
+    if (availablePositions.length == 0) return null;
     int randomIndex = random.nextInt(availablePositions.length);
     return availablePositions[randomIndex];
 
+}
+
+List<String> getShuffledPieces(){
+  List<String> pieces = ['bishop', 'king', 'knight', 'queen', 'rook', 'pawn'];
+  for(int i = 0; i < pieces.length; i++){
+    int randomIndex = random.nextInt(pieces.length);
+    String temp = pieces[i];
+    pieces[i] = pieces[randomIndex];
+    pieces[randomIndex] = temp;
+  }
+  return pieces;
 }
 
 String getRandomPiece(Coordinate currentPosition){
@@ -87,7 +107,7 @@ List<Coordinate> getAvailablePositions(Coordinate currentPosition, String piece,
       addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-2),false, board));
       addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,2),false, board));
       addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-2),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-2),false, board));
+      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,2),false, board));
       break;
     case "pawn":
       addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-1),false, board));
@@ -155,7 +175,10 @@ List<Coordinate> getAvailablePositionsFromMove(Coordinate currentPosition, Coord
   String valueOfNewPosition = board.getFromCoordinate(newPosition);
 
   if(valueOfNewPosition == "" || valueOfNewPosition == "x"){
-    if (!repeat) return [newPosition];
+    if (!repeat) {
+      if(valueOfNewPosition == "x") return [];
+      return [newPosition];
+    }
     var newList =  getAvailablePositionsFromMove(newPosition, offset, repeat, board);
     if(valueOfNewPosition == ""){
       newList.add(newPosition);
