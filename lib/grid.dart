@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:chess_dash/board.dart';
 
 class Grid extends StatelessWidget {
   Grid({
-    this.gridData,
+    this.board,
+    this.onPressPiece,
   });
 
-  final List<List<String>> gridData; 
+  final Board board; 
+  final Function onPressPiece;
 
   Widget grid(){
     List<Widget> rows = [];
-    for(int j = 0; j < gridData.length; j++){
+    for(int j = 0; j < board.pieces.length; j++){
       rows.add(this.row(j));
     }
     return Column(
@@ -21,8 +24,8 @@ class Grid extends StatelessWidget {
 
   Widget row(int j){
     List<Widget> squares = [];
-    for(int i = 0; i < gridData[0].length; i++){
-      squares.add(this.square(gridData[j][i]));
+    for(int i = 0; i < board.pieces[0].length; i++){
+      squares.add(this.square(i,j));
     }
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -31,20 +34,40 @@ class Grid extends StatelessWidget {
     );
   }
 
-  Widget square(String name){
+  handlePressFunc(x,y){
+    return (){
+      onPressPiece(x,y);
+    };
+  }
+
+  Widget square(int x, int y){
+    String name = this.board.pieces[y][x];
     Widget piece;
+    Color color;
+
     if (name == "" || name == "x"){
       piece = null;
     } else {
       piece = Image.asset('assets/png/'+name+'.png');
     }
+
+    if(this.board.selections[y][x] > 0){
+      color = Colors.amber;
+    } else {
+      color = Colors.white;
+    }
+
     return SizedBox(
       width:70,
       height:70,
-      child: Card(
-        child: Padding(
-          padding:EdgeInsets.all(8),
-          child: piece,
+      child: GestureDetector(
+        onTap: handlePressFunc(x, y),
+        child:Card(
+          color: color,
+          child: Padding(
+            padding:EdgeInsets.all(8),
+            child: piece,
+          ),
         ),
       ),
     );

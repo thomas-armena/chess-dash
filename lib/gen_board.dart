@@ -37,8 +37,10 @@ Board genBoard(int numberOfPieces, int xSize, int ySize) {
     }
     print(currentPosition.x.toString() + " " + currentPosition.y.toString() + " " + currentPiece); 
   }
-  currentPiece = getRandomPiece(currentPosition);
-  board.setFromCoordinate(nextPosition, currentPiece);
+  if (nextPosition != null){
+    currentPiece = getRandomPiece(currentPosition);
+    board.setFromCoordinate(nextPosition, currentPiece);
+  }
 
   return board;
 }

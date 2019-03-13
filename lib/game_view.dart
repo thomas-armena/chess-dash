@@ -11,13 +11,18 @@ class GameView extends StatefulWidget {
 
 class _GameViewState extends State<GameView> {
 
-  Board board = genBoard(4, 4, 6);
+  Board board = genBoard(10, 4, 6);
 
   void handlePress(){
-    print("called");
     setState((){
       print("Going to generate board");
-      board = genBoard(4, 4, 6);
+      board = genBoard(10, 4, 6);
+    });
+  }
+
+  void onPressPiece(int x, int y){
+    setState((){
+      board.selectPiece(x, y);
     });
   }
 
@@ -25,7 +30,8 @@ class _GameViewState extends State<GameView> {
   Widget build(BuildContext context){
     return Scaffold(
       body: Grid(
-        gridData:board.grid,
+        board:board,
+        onPressPiece: this.onPressPiece,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: handlePress,
