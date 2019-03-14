@@ -1,8 +1,10 @@
 import 'package:chess_dash/coordinate.dart';
+import 'package:chess_dash/available_positions.dart';
 
 class Board {
   List<List<String>> pieces;
   List<List<int>> selections;
+  List<List<bool>> availablePositions;
   int selectCount;
   
   Board(xSize, ySize){
@@ -22,6 +24,14 @@ class Board {
       (i) => List<int>.generate(
         xSize,
         (j) => 0,
+      )
+    );
+
+    this.availablePositions = List<List<bool>>.generate(
+      ySize, 
+      (i) => List<bool>.generate(
+        xSize,
+        (j) => false,
       )
     );
   }
@@ -50,8 +60,11 @@ class Board {
   }
 
   void selectPiece(int x, int y){
-    this.selectCount += 1;
-    this.selections[y][x] = this.selectCount;
+    if(this.availablePositions[y][x] || this.selectCount <= 0){
+      this.selectCount += 1;
+      this.selections[y][x] = this.selectCount;
+      this._setAvailablePositions(x, y);
+    }
   }
 
   void resetSelections(){
@@ -60,6 +73,24 @@ class Board {
       for(int x = 0; x < this.selections[0].length; x++){
         this.selections[y][x] = 0;
       }
+    }
+  }
+
+  void _setAvailablePositions(int x, int y){
+    Coordinate currentPosition =Coordinate(x, y);
+    List<Coordinate> availablePositions = getAvailablePositions(currentPosition, this.pieces[y][x], this, false);
+    print(availablePositions.toString());
+
+    for(int y = 0; y < this.availablePositions.length; y++){
+      for(int x = 0; x < this.availablePositions[0].length; x++){
+        this.availablePositions[y][x] = false;
+      }
+    }
+
+    for(int i = 0; i < availablePositions.length; i++){
+      print(x);
+      print(y);
+      this.availablePositions[availablePositions[i].y][availablePositions[i].x] = true;
     }
   }
 

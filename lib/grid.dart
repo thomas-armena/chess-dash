@@ -51,8 +51,12 @@ class Grid extends StatelessWidget {
       piece = Image.asset('assets/png/'+name+'.png');
     }
 
-    if(this.board.selections[y][x] > 0){
+    if(this.board.selections[y][x] >= this.board.selectCount && this.board.selectCount > 0){
+      color = Colors.blue;
+    } else if(this.board.selections[y][x] > 0){
       color = Colors.amber;
+    } else if (this.board.availablePositions[y][x]){
+      color = Colors.green;
     } else {
       color = Colors.white;
     }

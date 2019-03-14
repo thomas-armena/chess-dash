@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:chess_dash/coordinate.dart';
 import 'package:chess_dash/board.dart';
+import 'package:chess_dash/available_positions.dart';
 
 Random random = new Random();
 
@@ -46,7 +47,7 @@ Board genBoard(int numberOfPieces, int xSize, int ySize) {
 }
 
 Coordinate getRandomAvailablePosition(Coordinate currentPosition, String currentPiece, Board board){
-    var availablePositions = getAvailablePositions(currentPosition, currentPiece, board);
+    var availablePositions = getAvailablePositions(currentPosition, currentPiece, board, true);
     if (availablePositions.length == 0) return null;
     int randomIndex = random.nextInt(availablePositions.length);
     return availablePositions[randomIndex];
@@ -82,57 +83,6 @@ Coordinate getRandomCoordinate(xSize, ySize){
 }
 
 
-List<Coordinate> getAvailablePositions(Coordinate currentPosition, String piece, Board board){
-  List<Coordinate> availablePositions = [];
-  switch(piece){
-    case "bishop":
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-1),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,1),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-1),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,1),true, board));
-      break;
-    case "king":
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0,-1),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-1),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,0),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,1),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0,1),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,1),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,0),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-1),false, board));
-      break;
-    case "knight":
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-2,-1),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(2,-1),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(2,1),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-2,-1),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-2),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,2),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-2),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,2),false, board));
-      break;
-    case "pawn":
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-1),false, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-1),false, board));
-      break;
-    case "queen":
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0,-1),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,-1),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,0),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1,1),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0,1),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,1),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,0),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,-1),true, board));
-      break;
-    case "rook":
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0,-1),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(1, 0),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(0, 1),true, board));
-      addList(availablePositions,getAvailablePositionsFromMove(currentPosition, Coordinate(-1,0),true, board));
-  }
-  return availablePositions;
-}
 
 List<Coordinate> getPathPositions(Coordinate position1, Coordinate position2){
   List<Coordinate> pathPositions = [];
@@ -172,28 +122,4 @@ List<Coordinate> getPathPositions(Coordinate position1, Coordinate position2){
   return pathPositions;
 }
 
-List<Coordinate> getAvailablePositionsFromMove(Coordinate currentPosition, Coordinate offset, bool repeat, Board board){
-  Coordinate newPosition = addCoordinates(currentPosition, offset);
-  String valueOfNewPosition = board.getFromCoordinate(newPosition);
 
-  if(valueOfNewPosition == "" || valueOfNewPosition == "x"){
-    if (!repeat) {
-      if(valueOfNewPosition == "x") return [];
-      return [newPosition];
-    }
-    var newList =  getAvailablePositionsFromMove(newPosition, offset, repeat, board);
-    if(valueOfNewPosition == ""){
-      newList.add(newPosition);
-    }
-    return newList;
-  } else {
-    return [];
-  }
-}
-
-List<Coordinate> addList(List<Coordinate> a, List<Coordinate> b){
-  for(int i = 0; i < b.length; i++){
-    a.add(b[i]);
-  }
-  return a;
-}
