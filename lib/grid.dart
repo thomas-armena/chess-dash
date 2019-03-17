@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:chess_dash/board.dart';
 
-class Grid extends StatelessWidget {
+GlobalKey paintKey =GlobalKey();
+
+class Grid extends AnimatedWidget {
   Grid({
     this.board,
     this.onPressPiece,
-  });
+    Key key,
+    Animation animation
+  }): super(key: key, listenable: animation);
+
 
   final Board board; 
   final Function onPressPiece;
 
-  Widget grid(){
+  Widget grid(Function cell){
     List<Widget> rows = [];
     for(int j = 0; j < board.pieces.length; j++){
-      rows.add(this.row(j));
+      rows.add(this.row(j, cell));
     }
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -22,16 +27,72 @@ class Grid extends StatelessWidget {
     );
   }
 
-  Widget row(int j){
+  Widget row(int j, Function cell){
     List<Widget> squares = [];
     for(int i = 0; i < board.pieces[0].length; i++){
-      squares.add(this.square(i,j));
+      Widget cellWidget = Expanded(child: cell(i,j), flex: 1);
+      squares.add(cellWidget);
     }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: squares
+    return Expanded(
+      child:Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: squares
+      ),
+      flex: 1,
     );
+  }
+
+  Widget piece(int x, int y){
+    String name = this.board.pieces[y][x];
+    Widget piece;
+
+    if (name == "" || name == "x"){
+      piece = null;
+    } else {
+      piece = Image.asset('assets/png/'+name+'.png');
+    }
+
+    return GestureDetector(
+      onTap: handlePressFunc(x, y),
+      child: Padding(
+        child:piece,
+        padding: EdgeInsets.all(12),
+      ),
+    );
+  }
+
+  Widget highlight(int x, int y){
+    
+    String name = this.board.pieces[y][x];
+    Color color;
+    double marginValue;
+    int cellStatus = this.board.selections[y][x];
+    if (cellStatus > 0){
+      color = Colors.blue;
+      marginValue = 6;
+    } else if (name == "" || name == "x"){
+      color = Colors.grey[200];
+      marginValue = 25;
+    } else if (this.board.availablePositions[y][x]){
+      color = Colors.green[200];
+      marginValue = 12;
+    } else {
+      color = Colors.white;
+      marginValue = 25;
+    }
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 100),
+      margin:EdgeInsets.all(marginValue),
+      key: this.board.globalKeys[y][x],
+      child: Container(
+        decoration: BoxDecoration(
+          shape:BoxShape.circle,
+          color: color,
+        ),
+      )
+    );
+
   }
 
   handlePressFunc(x,y){
@@ -40,46 +101,74 @@ class Grid extends StatelessWidget {
     };
   }
 
-  Widget square(int x, int y){
-    String name = this.board.pieces[y][x];
-    Widget piece;
-    Color color;
-
-    if (name == "" || name == "x"){
-      piece = null;
-    } else {
-      piece = Image.asset('assets/png/'+name+'.png');
-    }
-
-    if(this.board.selections[y][x] >= this.board.selectCount && this.board.selectCount > 0){
-      color = Colors.blue;
-    } else if(this.board.selections[y][x] > 0){
-      color = Colors.amber;
-    } else if (this.board.availablePositions[y][x]){
-      color = Colors.green;
-    } else {
-      color = Colors.white;
-    }
-
-    return SizedBox(
-      width:70,
-      height:70,
-      child: GestureDetector(
-        onTap: handlePressFunc(x, y),
-        child:Card(
-          color: color,
-          child: Padding(
-            padding:EdgeInsets.all(8),
-            child: piece,
-          ),
-        ),
-      ),
-    );
-  }
-
-
   @override
   Widget build(BuildContext context){
-    return this.grid();
+    Animation animation = this.listenable;
+    print(animation.value);
+    return Stack(
+      children:<Widget>[
+        this.grid(this.highlight),
+        CustomPaint(
+          key:paintKey,
+          painter: LinePainter(board: this.board),
+          child:this.grid(this.piece)
+        ),
+      ]
+    );
+  }
+}
+
+class LinePainter extends CustomPainter {
+  LinePainter({this.board});
+  final Board board;
+
+  @override
+  void paint(Canvas canvas, Size size){
+    int xSize = this.board.pieces[0].length;
+    int ySize = this.board.pieces.length;
+
+    RenderBox paintRenderBox =paintKey.currentContext.findRenderObject();
+    Offset paintPosition =paintRenderBox.localToGlobal(Offset.zero);
+
+    List<List<Offset>> positions = List<List<Offset>>.generate(
+      ySize,
+      (i) => List<Offset>.generate(
+        xSize,
+        (j) => Offset(0,0),
+      )
+    );
+
+    if(this.board.globalKeys[0][0].currentContext != null){
+      for(int y = 0; y < ySize; y++){
+        for(int x = 0; x < xSize; x++){
+          RenderBox renderBox = this.board.globalKeys[y][x].currentContext.findRenderObject();
+          Offset position =renderBox.localToGlobal(Offset.zero);
+          double width =renderBox.size.width;
+          double height = renderBox.size.height;
+          Offset centeredPosition = Offset(position.dx + width/2, position.dy +height/2);
+          Offset realPosition = Offset(centeredPosition.dx - paintPosition.dx, centeredPosition.dy - paintPosition.dy);
+          positions[y][x] = realPosition;
+        }
+      }
+    }
+
+    final paint = Paint()
+      ..color = Colors.blue
+      ..strokeWidth = 8.0;
+    // center of the canvas is (x,y) => (width/2, height/2)
+    for(int i = 1; i < this.board.path.length; i++){
+      int xPrevIndex = this.board.path[i-1].x;
+      int yPrevIndex = this.board.path[i-1].y;
+      int xCurrIndex = this.board.path[i].x;
+      int yCurrIndex = this.board.path[i].y;
+
+      canvas.drawLine(positions[yPrevIndex][xPrevIndex], positions[yCurrIndex][xCurrIndex],paint);
+    }
+
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate){
+    return true;
   }
 }

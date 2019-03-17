@@ -1,15 +1,20 @@
 import 'package:chess_dash/coordinate.dart';
 import 'package:chess_dash/available_positions.dart';
+import 'package:flutter/widgets.dart';
 
 class Board {
   List<List<String>> pieces;
   List<List<int>> selections;
+  List<Coordinate> path;
   List<List<bool>> availablePositions;
+  List<List<GlobalKey>> globalKeys;
   int selectCount;
   
   Board(xSize, ySize){
 
     selectCount = 0;
+
+    this.path = [];
 
     this.pieces = List<List<String>>.generate(
       ySize, 
@@ -32,6 +37,14 @@ class Board {
       (i) => List<bool>.generate(
         xSize,
         (j) => false,
+      )
+    );
+
+    this.globalKeys = List<List<GlobalKey>>.generate(
+      ySize, 
+      (i) => List<GlobalKey>.generate(
+        xSize,
+        (j) => GlobalKey(),
       )
     );
   }
@@ -62,6 +75,7 @@ class Board {
   void selectPiece(int x, int y){
     if(this.availablePositions[y][x] || this.selectCount <= 0){
       this.selectCount += 1;
+      this.path.add(Coordinate(x,y));
       this.selections[y][x] = this.selectCount;
       this._setAvailablePositions(x, y);
     }
@@ -69,6 +83,7 @@ class Board {
 
   void resetSelections(){
     this.selectCount = 0;
+    this.path = [];
     for(int y = 0; y < this.selections.length; y++){
       for(int x = 0; x < this.selections[0].length; x++){
         this.selections[y][x] = 0;
