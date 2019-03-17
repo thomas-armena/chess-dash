@@ -105,15 +105,33 @@ class Grid extends AnimatedWidget {
   Widget build(BuildContext context){
     Animation animation = this.listenable;
     print(animation.value);
-    return Stack(
-      children:<Widget>[
-        this.grid(this.highlight),
-        CustomPaint(
-          key:paintKey,
-          painter: LinePainter(board: this.board),
-          child:this.grid(this.piece)
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius:BorderRadius.all(Radius.circular(8)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey[200],
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset:Offset(2, 2)
+          )
+        ]
+      ),
+      margin:EdgeInsets.all(20),
+      child: Padding(
+        padding:EdgeInsets.all(20),
+        child:Stack(
+          children:<Widget>[
+            this.grid(this.highlight),
+            CustomPaint(
+              key:paintKey,
+              painter: LinePainter(board: this.board),
+              child:this.grid(this.piece)
+            ),
+          ]
         ),
-      ]
+      ),
     );
   }
 }

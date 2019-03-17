@@ -13,11 +13,19 @@ class _GameViewState extends State<GameView> with SingleTickerProviderStateMixin
   Animation animation;
   AnimationController animationController;
 
-  Board board = genBoard(6, 4, 6);
+  int numberOfPieces;
+  int xSize;
+  int ySize;
+  Board board; 
+  Board nextBoard;
 
   @override
   void initState(){
     super.initState();
+    numberOfPieces = 6;
+    xSize = 4;
+    ySize = 6;
+    board =genBoard(numberOfPieces, xSize, ySize);
     animationController = AnimationController(
       duration: Duration(milliseconds: 250),
       vsync: this
@@ -34,8 +42,7 @@ class _GameViewState extends State<GameView> with SingleTickerProviderStateMixin
 
   void handlePress(){
     setState((){
-      print("Going to generate board");
-      board = genBoard(6, 4, 6);
+      board.resetSelections();
     });
   }
 
@@ -44,6 +51,9 @@ class _GameViewState extends State<GameView> with SingleTickerProviderStateMixin
       animationController.reset();
       animationController.forward();
       board.selectPiece(x, y);
+      if(board.selectCount ==numberOfPieces){
+        board =genBoard(numberOfPieces, xSize, ySize);
+      }
     });
   }
 
@@ -57,28 +67,23 @@ class _GameViewState extends State<GameView> with SingleTickerProviderStateMixin
 
           Expanded(
             flex: 5,
-            child: Card(
-              margin:EdgeInsets.all(20),
-              child: Padding(
-                padding:EdgeInsets.all(20),
-                child:Grid(
-                  board:board,
-                  onPressPiece: this.onPressPiece,
-                  animation: animation,
-                ),
-              ),
-            ),
+            child: Grid(
+              onPressPiece: this.onPressPiece,
+              board: this.board,
+              animation: this.animation,
+            )
           ),
 
-          Expanded(flex: 1, child:Text("TEST")),
+          Expanded(
+            flex: 1,
+            child: IconButton(
+              icon: Icon(Icons.refresh),
+              tooltip: 'Refresh board',
+              onPressed: handlePress,
+            )
+          )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: handlePress,
-        tooltip: 'Increment Counter',
-        child: Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

@@ -87,6 +87,7 @@ class Board {
     for(int y = 0; y < this.selections.length; y++){
       for(int x = 0; x < this.selections[0].length; x++){
         this.selections[y][x] = 0;
+        this.availablePositions[y][x] = false;
       }
     }
   }
