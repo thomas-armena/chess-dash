@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:chess_dash/home_page.dart';
 import 'package:chess_dash/game_view.dart';
 import 'package:flutter/services.dart';
 
@@ -11,13 +12,17 @@ class MyApp extends StatelessWidget {
     SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
-      ]);
+    ]);
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: GameView(),
+      home: HomePage(),
+      routes: <String, WidgetBuilder> {
+        "/GameView": (BuildContext context) => new GameView(),
+      },
     );
   }
 }

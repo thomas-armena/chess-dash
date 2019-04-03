@@ -82,8 +82,6 @@ Coordinate getRandomCoordinate(xSize, ySize){
   return Coordinate(random.nextInt(xSize), random.nextInt(ySize));
 }
 
-
-
 List<Coordinate> getPathPositions(Coordinate position1, Coordinate position2){
   List<Coordinate> pathPositions = [];
   

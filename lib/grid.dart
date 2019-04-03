@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:chess_dash/board.dart';
 
-GlobalKey paintKey =GlobalKey();
-
 class Grid extends AnimatedWidget {
   Grid({
     this.board,
     this.onPressPiece,
+    this.completed,
+    this.skipped,
+    this.paintKey,
     Key key,
     Animation animation
   }): super(key: key, listenable: animation);
 
 
+  final GlobalKey paintKey;
   final Board board; 
   final Function onPressPiece;
+  final bool completed;
+  final bool skipped;
 
   Widget grid(Function cell){
     List<Widget> rows = [];
@@ -63,6 +67,10 @@ class Grid extends AnimatedWidget {
   }
 
   Widget highlight(int x, int y){
+
+    if(this.board == null){
+      return null;
+    }
     
     String name = this.board.pieces[y][x];
     Color color;
@@ -103,11 +111,20 @@ class Grid extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context){
-    Animation animation = this.listenable;
-    print(animation.value);
-    return Container(
+
+    Color gridContainerColor;
+    if (this.completed){
+      gridContainerColor = Colors.green;
+    } else if (this.skipped){
+      gridContainerColor = Colors.red;
+    } else {
+      gridContainerColor = Colors.white;
+    }
+
+    return AnimatedContainer(
+      duration:Duration(milliseconds: 250),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: gridContainerColor,
         borderRadius:BorderRadius.all(Radius.circular(8)),
         boxShadow: [
           BoxShadow(
@@ -125,8 +142,11 @@ class Grid extends AnimatedWidget {
           children:<Widget>[
             this.grid(this.highlight),
             CustomPaint(
-              key:paintKey,
-              painter: LinePainter(board: this.board),
+              key:this.paintKey,
+              painter: LinePainter(
+                board: this.board,
+                paintKey: this.paintKey,
+              ),
               child:this.grid(this.piece)
             ),
           ]
@@ -137,8 +157,9 @@ class Grid extends AnimatedWidget {
 }
 
 class LinePainter extends CustomPainter {
-  LinePainter({this.board});
+  LinePainter({this.board, this.paintKey});
   final Board board;
+  final GlobalKey paintKey;
 
   @override
   void paint(Canvas canvas, Size size){
