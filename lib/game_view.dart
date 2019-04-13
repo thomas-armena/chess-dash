@@ -45,12 +45,6 @@ class _GameViewState extends State<GameView> with TickerProviderStateMixin {
     paintKey2 =GlobalKey();
   }
 
-  @override
-  void dispose(){
-    animationController.dispose();
-    super.dispose();
-  }
-
   void _initiateAnimationForBoardTransitions(){
     animationController = AnimationController(
       duration: Duration(milliseconds: 400),
@@ -82,6 +76,13 @@ class _GameViewState extends State<GameView> with TickerProviderStateMixin {
 
     timer = Tween(begin: 0, end: 1.0).animate(timerController);
     timerController.forward();
+  }
+
+  @override
+  void dispose(){
+    animationController.dispose();
+    timerController.dispose();
+    super.dispose();
   }
 
   void handleRefreshPress(){
@@ -164,7 +165,6 @@ class _GameViewState extends State<GameView> with TickerProviderStateMixin {
       );
     }
     return Stack(children: boards);
-
   }
 
   Future<void> gameOver() async {
@@ -224,7 +224,6 @@ class _GameViewState extends State<GameView> with TickerProviderStateMixin {
         ),
       ],
     );
-
   }
 
   @override

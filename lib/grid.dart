@@ -81,7 +81,7 @@ class Grid extends AnimatedWidget {
       marginValue = 6;
     } else if (name == "" || name == "x"){
       color = Colors.grey[200];
-      marginValue = 25;
+      marginValue = 20;
     } else if (this.board.availablePositions[y][x]){
       color = Colors.green[200];
       marginValue = 12;
@@ -121,35 +121,38 @@ class Grid extends AnimatedWidget {
       gridContainerColor = Colors.white;
     }
 
-    return AnimatedContainer(
-      duration:Duration(milliseconds: 250),
-      decoration: BoxDecoration(
-        color: gridContainerColor,
-        borderRadius:BorderRadius.all(Radius.circular(8)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey[200],
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset:Offset(2, 2)
-          )
-        ]
-      ),
-      margin:EdgeInsets.all(20),
-      child: Padding(
-        padding:EdgeInsets.all(20),
-        child:Stack(
-          children:<Widget>[
-            this.grid(this.highlight),
-            CustomPaint(
-              key:this.paintKey,
-              painter: LinePainter(
-                board: this.board,
-                paintKey: this.paintKey,
-              ),
-              child:this.grid(this.piece)
-            ),
+    return AspectRatio(
+        aspectRatio: board.pieces[0].length / board.pieces.length,
+        child:AnimatedContainer(
+        duration:Duration(milliseconds: 250),
+        decoration: BoxDecoration(
+          color: gridContainerColor,
+          borderRadius:BorderRadius.all(Radius.circular(8)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey[200],
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset:Offset(2, 2)
+            )
           ]
+        ),
+        margin:EdgeInsets.all(20),
+        child: Padding(
+          padding:EdgeInsets.all(20),
+          child:Stack(
+            children:<Widget>[
+              this.grid(this.highlight),
+              CustomPaint(
+                key:this.paintKey,
+                painter: LinePainter(
+                  board: this.board,
+                  paintKey: this.paintKey,
+                ),
+                child:this.grid(this.piece)
+              ),
+            ]
+          ),
         ),
       ),
     );

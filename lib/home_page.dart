@@ -24,16 +24,34 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildScore(){
-    return Text(this.maxScore.toString());
+    return Text(
+      this.maxScore.toString(),
+      style: TextStyle(
+        fontSize: 20.0,
+      ),
+    );
   }
 
   Widget _buildTitle(){
-    return Text('Chess Dash');
+    return Text(
+      'Chess Dash',
+      style: TextStyle(
+        fontSize: 30.0,
+      ),
+    );
   }
 
   Widget _buildPlayButton(BuildContext context){
-    return RaisedButton(
-      child: Text('Play'),
+    return MaterialButton(
+      child: Text(
+        'Play',
+        style: TextStyle(
+          fontSize: 25.0,
+        ),
+      ),
+      color: Colors.blue,
+      textColor: Colors.white,
+      padding: EdgeInsets.all(10.0),
       onPressed: (){
         Navigator.of(context).pushNamed("/GameView");
       },
