@@ -9,10 +9,12 @@ class Board {
   List<List<bool>> availablePositions;
   List<List<GlobalKey>> globalKeys;
   int selectCount;
+  int numberOfPieces;
   
   Board(xSize, ySize){
 
     selectCount = 0;
+    numberOfPieces = 0;
 
     this.path = [];
 
@@ -66,10 +68,12 @@ class Board {
 
   void set(int x, int y, String piece){
     this.pieces[y][x] = piece;
+    this.numberOfPieces += 1;
   }
 
   void setFromCoordinate(Coordinate coordinate, String piece){
     this.pieces[coordinate.y][coordinate.x] = piece;
+    this.numberOfPieces += 1;
   }
 
   void selectPiece(int x, int y){

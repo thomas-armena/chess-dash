@@ -27,30 +27,30 @@ class _HomePageState extends State<HomePage> {
     return Text(
       this.maxScore.toString(),
       style: TextStyle(
-        fontSize: 20.0,
-      ),
-    );
-  }
-
-  Widget _buildTitle(){
-    return Text(
-      'Chess Dash',
-      style: TextStyle(
         fontSize: 30.0,
       ),
     );
   }
 
-  Widget _buildPlayButton(BuildContext context){
-    return MaterialButton(
-      child: Text(
-        'Play',
-        style: TextStyle(
-          fontSize: 25.0,
+  Widget _buildTitle(){
+    return Column(
+      children: <Widget>[
+        Image.asset('assets/png/queen.png', width: 40.0, height: 40.0),
+        Text(
+          'Chess Dash',
+          style: TextStyle(
+            fontSize: 30.0,
+          ),
         ),
-      ),
-      color: Colors.blue,
-      textColor: Colors.white,
+      ],
+    );
+  }
+
+  Widget _buildPlayButton(BuildContext context){
+    return IconButton(
+      icon: Icon(Icons.play_arrow),
+      iconSize: 100,
+      color: Colors.black,
       padding: EdgeInsets.all(10.0),
       onPressed: (){
         Navigator.of(context).pushNamed("/GameView");
@@ -58,18 +58,25 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context){
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children:<Widget>[
-            this._buildScore(),
-            this._buildTitle(),
-            this._buildPlayButton(context),
-          ]
+    return WillPopScope(
+      onWillPop: (){},
+      child: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children:<Widget>[
+              this._buildScore(),
+              this._buildTitle(),
+              this._buildPlayButton(context),
+            ]
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.help_outline, size: 40),
+          backgroundColor: Colors.black,
+          onPressed: (){Navigator.of(context).pushNamed("/Help");},
         ),
       ),
     );

@@ -95,18 +95,17 @@ class _GameViewState extends State<GameView> with TickerProviderStateMixin {
     this.goToNextBoard();
   }
 
-
   void onPressPiece(int x, int y){
     setState((){
       board.selectPiece(x, y);
       if(board.selectCount == numberOfPieces){
-        if(score >= 50){
+        if(score >= 70){
           numberOfPieces = 8;
-        } else if (score >= 40){
+        } else if (score >= 50){
           numberOfPieces = 7;
-        } else if (score >= 30){
+        } else if (score >= 40){
           numberOfPieces = 6;
-        } else if (score >= 20){
+        } else if (score >= 25){
           numberOfPieces = 5;
         } else if (score >= 10){
           numberOfPieces = 4;
@@ -173,17 +172,20 @@ class _GameViewState extends State<GameView> with TickerProviderStateMixin {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Game Over'),
-          content: Text('You scored '+score.toString()+' points!'),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('menu'),
-              onPressed: () {
-                Navigator.of(context).pushNamed("/");
-              },
-            ),
-          ],
+        return WillPopScope(
+          onWillPop: (){},
+          child: AlertDialog(
+            title: Text('Game Over'),
+            content: Text('You scored '+score.toString()+' points!'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('menu'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/");
+                },
+              ),
+            ],
+          ),
         );
       },
     );
